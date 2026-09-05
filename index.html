@@ -1,796 +1,699 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="OfficeWard is an AI employee that answers your business's phone, books appointments, captures leads, and remembers your customers.">
+<title>OfficeWard — Your business just hired an employee</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%230A0D14'/%3E%3Cpath d='M7 6.5c0-.8.6-1.5 1.4-1.5h1.4c.6 0 1.1.4 1.3 1l.8 2.2c.2.5 0 1-.4 1.4l-1 .9c.8 1.8 2.2 3.2 4 4l.9-1c.4-.4.9-.5 1.4-.4l2.2.8c.6.2 1 .7 1 1.3v1.4c0 .8-.7 1.4-1.5 1.4C12.7 18 6 11.3 6 3.5' fill='none' stroke='%23E8A94A' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg: #0A0D14;
+        --bg-soft: #10141D;
+        --bg-softer: #151A24;
+        --text: #F2F1ED;
+        --text-muted: #8B93A3;
+        --text-faint: #565D6B;
+        --accent: #E8A94A;
+        --accent-dim: #B8853B;
+        --accent-soft: rgba(232, 169, 74, 0.12);
+        --line: rgba(255, 255, 255, 0.09);
+        --line-soft: rgba(255, 255, 255, 0.05);
+        --sans: 'Manrope', -apple-system, sans-serif;
+        --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', monospace;
+        --radius: 14px;
+    }
 
-    <title>OfficeWard — AI Employees for Business</title>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+    body {
+        font-family: var(--sans);
+        background: var(--bg);
+        color: var(--text);
+        overflow-x: hidden;
+        line-height: 1.5;
+    }
+
+    a { color: inherit; }
+
+    :focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 3px;
+        border-radius: 4px;
+    }
+
+    /* ---------- BACKGROUND ---------- */
+
+    body::before {
+        content: "";
+        position: fixed;
+        width: 900px;
+        height: 500px;
+        top: -220px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: radial-gradient(ellipse, rgba(232, 169, 74, 0.10), transparent 65%);
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    /* ---------- NAVBAR ---------- */
+
+    header {
+        width: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 100;
+    }
+
+    nav {
+        padding: 20px 7%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        backdrop-filter: blur(16px);
+        background: rgba(10, 13, 20, 0.72);
+        border-bottom: 1px solid var(--line-soft);
+        transition: background 0.25s ease;
+    }
+
+    .logo {
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .logo .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 2px;
+        background: var(--accent);
+        display: inline-block;
+    }
+
+    .logo span { color: var(--text-muted); font-weight: 700; }
+
+    .nav-links {
+        display: flex;
+        gap: 34px;
+        align-items: center;
+    }
+
+    .nav-links a:not(.nav-button) {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 14.5px;
+        transition: color 0.2s;
+    }
+
+    .nav-links a:not(.nav-button):hover { color: var(--text); }
+
+    .nav-button {
+        padding: 10px 18px;
+        border-radius: 9px;
+        background: var(--accent);
+        color: #1A1305 !important;
+        font-weight: 700;
+        font-size: 14px;
+        text-decoration: none;
+        transition: transform 0.2s, background 0.2s;
+    }
+
+    .nav-button:hover { transform: translateY(-2px); background: #f0b662; }
+
+    .nav-toggle {
+        display: none;
+        background: none;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        width: 40px;
+        height: 40px;
+        color: var(--text);
+        font-size: 18px;
+        cursor: pointer;
+    }
+
+    .mobile-menu {
+        display: none;
+        flex-direction: column;
+        padding: 10px 7% 26px;
+        background: rgba(10, 13, 20, 0.97);
+        border-bottom: 1px solid var(--line);
+    }
+
+    .mobile-menu.open { display: flex; }
+
+    .mobile-menu a {
+        padding: 14px 0;
+        border-bottom: 1px solid var(--line-soft);
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 15px;
+    }
+
+    .mobile-menu .nav-button {
+        margin-top: 16px;
+        text-align: center;
+        border-bottom: none;
+        color: #1A1305 !important;
+    }
+
+    /* ---------- HERO ---------- */
+
+    .hero {
+        min-height: 100vh;
+        padding: 170px 7% 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .hero-content { max-width: 900px; width: 100%; }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 14px;
+        border: 1px solid var(--line);
+        border-radius: 100px;
+        color: var(--text-muted);
+        background: var(--bg-soft);
+        font-size: 13px;
+        margin-bottom: 26px;
+    }
+
+    .badge .dot {
+        width: 6px; height: 6px; border-radius: 50%;
+        background: var(--accent);
+    }
+
+    .hero h1 {
+        font-size: clamp(38px, 6.4vw, 76px);
+        line-height: 1.05;
+        letter-spacing: -2.5px;
+        font-weight: 800;
+        margin-bottom: 24px;
+    }
+
+    .hero p.lede {
+        max-width: 620px;
+        margin: 0 auto;
+        color: var(--text-muted);
+        font-size: 19px;
+        line-height: 1.6;
+    }
+
+    .hero-buttons {
+        margin-top: 36px;
+        display: flex;
+        justify-content: center;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .primary-button, .secondary-button {
+        padding: 14px 24px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 15px;
+        transition: transform 0.2s, background 0.2s;
+        display: inline-block;
+    }
+
+    .primary-button { background: var(--accent); color: #1A1305; }
+    .primary-button:hover { transform: translateY(-2px); background: #f0b662; }
+
+    .secondary-button {
+        border: 1px solid var(--line);
+        color: var(--text);
+        background: var(--bg-soft);
+    }
+    .secondary-button:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.25); }
+
+    /* ---------- CALL TRANSCRIPT DEMO ---------- */
+
+    .call-demo {
+        width: min(620px, 100%);
+        margin: 84px auto 0;
+        text-align: left;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--bg-soft);
+        box-shadow: 0 40px 100px rgba(0,0,0,0.45);
+        overflow: hidden;
+    }
+
+    .call-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--line-soft);
+        font-family: var(--mono);
+        font-size: 12.5px;
+        color: var(--text-faint);
+    }
+
+    .call-status {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--accent);
+    }
+
+    .call-status .pulse {
+        width: 6px; height: 6px; border-radius: 50%;
+        background: var(--accent);
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        .call-status .pulse { animation: pulse 1.6s infinite ease-in-out; }
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.35; }
+    }
+
+    .transcript { padding: 22px 20px 24px; display: flex; flex-direction: column; gap: 14px; }
+
+    .line { display: flex; gap: 10px; max-width: 88%; opacity: 1; }
+    .line.them { align-self: flex-start; }
+    .line.us { align-self: flex-end; flex-direction: row-reverse; text-align: right; }
+
+    .line .speaker {
+        flex-shrink: 0;
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--text-faint);
+        padding-top: 3px;
+        width: 46px;
+    }
+    .line.us .speaker { color: var(--accent-dim); }
+
+    .line .bubble {
+        font-size: 14.5px;
+        line-height: 1.5;
+        color: var(--text);
+        background: var(--bg-softer);
+        padding: 10px 14px;
+        border-radius: 12px;
+    }
+    .line.us .bubble { background: var(--accent-soft); }
+
+    .transcript .footnote {
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--text-faint);
+        padding-top: 4px;
+        text-align: center;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        .line {
+            animation: rise 0.5s ease both;
         }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            background: #050509;
-            color: #ffffff;
-            overflow-x: hidden;
-        }
-
-        /* ---------- BACKGROUND ---------- */
-
-        body::before {
-            content: "";
-            position: fixed;
-            width: 700px;
-            height: 700px;
-            top: -300px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: radial-gradient(
-                circle,
-                rgba(100, 80, 255, 0.25),
-                transparent 65%
-            );
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        /* ---------- NAVBAR ---------- */
-
-        nav {
-            width: 100%;
-            padding: 24px 7%;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 100;
-            backdrop-filter: blur(15px);
-            background: rgba(5, 5, 9, 0.65);
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: 800;
-            letter-spacing: -1px;
-        }
-
-        .logo span {
-            opacity: 0.45;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 30px;
-            align-items: center;
-        }
-
-        .nav-links a {
-            color: #aaa;
-            text-decoration: none;
-            font-size: 14px;
-            transition: 0.25s;
-        }
-
-        .nav-links a:hover {
-            color: white;
-        }
-
-        .nav-button {
-            padding: 10px 18px;
-            border-radius: 10px;
-            background: white;
-            color: black !important;
-            font-weight: 600;
-        }
-
-        /* ---------- HERO ---------- */
-
-        .hero {
-            min-height: 100vh;
-            padding: 180px 7% 100px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            position: relative;
-        }
-
-        .hero-content {
-            max-width: 950px;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 8px 14px;
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 100px;
-            color: #bbb;
-            background: rgba(255,255,255,0.04);
-            font-size: 13px;
-            margin-bottom: 28px;
-        }
-
-        .hero h1 {
-            font-size: clamp(55px, 8vw, 105px);
-            line-height: 0.95;
-            letter-spacing: -6px;
-            margin-bottom: 30px;
-        }
-
-        .gradient-text {
-            background: linear-gradient(
-                90deg,
-                #ffffff,
-                #9c8cff,
-                #ffffff
-            );
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-size: 200%;
-            animation: gradientMove 5s infinite linear;
-        }
-
-        @keyframes gradientMove {
-            0% {
-                background-position: 0%;
-            }
-
-            100% {
-                background-position: 200%;
-            }
-        }
-
-        .hero p {
-            max-width: 650px;
-            margin: auto;
-            color: #999;
-            font-size: 20px;
-            line-height: 1.6;
-        }
-
-        .hero-buttons {
-            margin-top: 40px;
-            display: flex;
-            justify-content: center;
-            gap: 14px;
-        }
-
-        .primary-button,
-        .secondary-button {
-            padding: 15px 24px;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: 0.25s;
-        }
-
-        .primary-button {
-            background: white;
-            color: black;
-        }
-
-        .secondary-button {
-            border: 1px solid rgba(255,255,255,0.15);
-            color: white;
-            background: rgba(255,255,255,0.04);
-        }
-
-        .primary-button:hover,
-        .secondary-button:hover {
-            transform: translateY(-3px);
-        }
-
-        /* ---------- CALL VISUAL ---------- */
-
-        .call-demo {
-            width: min(800px, 90%);
-            margin: 90px auto 0;
-            padding: 28px;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 24px;
-            background: rgba(255,255,255,0.035);
-            backdrop-filter: blur(20px);
-            box-shadow: 0 30px 100px rgba(0,0,0,0.4);
-        }
-
-        .call-top {
-            display: flex;
-            justify-content: space-between;
-            color: #777;
-            font-size: 13px;
-            margin-bottom: 25px;
-        }
-
-        .call-status {
-            color: #7cffb2;
-        }
-
-        .wave {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            height: 90px;
-        }
-
-        .bar {
-            width: 5px;
-            height: 25px;
-            border-radius: 20px;
-            background: #8f80ff;
-            animation: wave 1s infinite ease-in-out;
-        }
-
-        .bar:nth-child(2) { animation-delay: .1s; }
-        .bar:nth-child(3) { animation-delay: .2s; }
-        .bar:nth-child(4) { animation-delay: .3s; }
-        .bar:nth-child(5) { animation-delay: .4s; }
-        .bar:nth-child(6) { animation-delay: .3s; }
-        .bar:nth-child(7) { animation-delay: .2s; }
-
-        @keyframes wave {
-            0%, 100% {
-                height: 20px;
-            }
-
-            50% {
-                height: 70px;
-            }
-        }
-
-        /* ---------- SECTIONS ---------- */
-
-        section {
-            padding: 120px 7%;
-        }
-
-        .section-title {
-            max-width: 750px;
-            margin-bottom: 60px;
-        }
-
-        .section-title h2 {
-            font-size: clamp(40px, 6vw, 70px);
-            letter-spacing: -3px;
-            margin-bottom: 20px;
-        }
-
-        .section-title p {
-            color: #888;
-            font-size: 18px;
-            line-height: 1.6;
-        }
-
-        /* ---------- FEATURES ---------- */
-
-        .features {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 18px;
-        }
-
-        .feature {
-            padding: 35px;
-            min-height: 250px;
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 22px;
-            background: rgba(255,255,255,0.025);
-            transition: 0.3s;
-        }
-
-        .feature:hover {
-            transform: translateY(-6px);
-            border-color: rgba(255,255,255,0.18);
-            background: rgba(255,255,255,0.045);
-        }
-
-        .feature-icon {
-            font-size: 30px;
-            margin-bottom: 35px;
-        }
-
-        .feature h3 {
-            font-size: 24px;
-            margin-bottom: 12px;
-        }
-
-        .feature p {
-            color: #888;
-            line-height: 1.6;
-        }
-
-        /* ---------- HOW IT WORKS ---------- */
-
-        .steps {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-        }
-
-        .step {
-            padding: 30px;
-            border-top: 1px solid rgba(255,255,255,0.15);
-        }
-
-        .step-number {
-            color: #777;
-            font-size: 13px;
-            margin-bottom: 35px;
-        }
-
-        .step h3 {
-            font-size: 21px;
-            margin-bottom: 12px;
-        }
-
-        .step p {
-            color: #777;
-            line-height: 1.5;
-        }
-
-        /* ---------- PRICING ---------- */
-
-        .pricing-card {
-            max-width: 500px;
-            padding: 45px;
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 25px;
-            background: linear-gradient(
-                145deg,
-                rgba(255,255,255,0.07),
-                rgba(255,255,255,0.02)
-            );
-        }
-
-        .pricing-card h3 {
-            font-size: 25px;
-            margin-bottom: 10px;
-        }
-
-        .price {
-            font-size: 60px;
-            font-weight: 700;
-            margin: 25px 0;
-        }
-
-        .price span {
-            font-size: 16px;
-            color: #777;
-            font-weight: normal;
-        }
-
-        .pricing-card ul {
-            list-style: none;
-            margin-bottom: 30px;
-        }
-
-        .pricing-card li {
-            padding: 10px 0;
-            color: #aaa;
-        }
-
-        /* ---------- FINAL CTA ---------- */
-
-        .final-cta {
-            text-align: center;
-            padding-bottom: 150px;
-        }
-
-        .final-cta h2 {
-            font-size: clamp(45px, 7vw, 85px);
-            letter-spacing: -4px;
-            margin-bottom: 30px;
-        }
-
-        .final-cta p {
-            color: #888;
-            font-size: 18px;
-            margin-bottom: 35px;
-        }
-
-        /* ---------- FOOTER ---------- */
-
-        footer {
-            padding: 40px 7%;
-            border-top: 1px solid rgba(255,255,255,0.07);
-            display: flex;
-            justify-content: space-between;
-            color: #555;
-            font-size: 13px;
-        }
-
-        /* ---------- MOBILE ---------- */
-
-        @media (max-width: 800px) {
-
-            .nav-links {
-                display: none;
-            }
-
-            .hero h1 {
-                letter-spacing: -4px;
-            }
-
-            .hero-buttons {
-                flex-direction: column;
-            }
-
-            .features {
-                grid-template-columns: 1fr;
-            }
-
-            .steps {
-                grid-template-columns: 1fr;
-            }
-
-            footer {
-                flex-direction: column;
-                gap: 10px;
-            }
-        }
-    </style>
+        .line:nth-child(1) { animation-delay: 0.15s; }
+        .line:nth-child(2) { animation-delay: 0.65s; }
+        .line:nth-child(3) { animation-delay: 1.15s; }
+        .line:nth-child(4) { animation-delay: 1.65s; }
+        .transcript .footnote { animation: rise 0.5s ease both; animation-delay: 2.15s; }
+    }
+
+    @keyframes rise {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ---------- SECTIONS ---------- */
+
+    section { padding: 110px 7%; }
+
+    .section-title { max-width: 700px; margin-bottom: 56px; }
+
+    .section-title .eyebrow {
+        font-family: var(--mono);
+        font-size: 13px;
+        color: var(--accent-dim);
+        margin-bottom: 14px;
+    }
+
+    .section-title h2 {
+        font-size: clamp(32px, 4.6vw, 52px);
+        letter-spacing: -1.5px;
+        font-weight: 800;
+        margin-bottom: 16px;
+    }
+
+    .section-title p { color: var(--text-muted); font-size: 17px; line-height: 1.6; max-width: 540px; }
+
+    /* ---------- FEATURES (call-log list, not a card grid) ---------- */
+
+    .call-log { border-top: 1px solid var(--line); }
+
+    .log-entry {
+        display: grid;
+        grid-template-columns: 90px 1fr;
+        gap: 24px;
+        padding: 28px 0;
+        border-bottom: 1px solid var(--line);
+        align-items: start;
+    }
+
+    .log-entry .tag {
+        font-family: var(--mono);
+        font-size: 12.5px;
+        color: var(--accent-dim);
+        padding-top: 4px;
+    }
+
+    .log-entry h3 {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    .log-entry p {
+        color: var(--text-muted);
+        line-height: 1.6;
+        max-width: 480px;
+    }
+
+    /* ---------- HOW IT WORKS ---------- */
+
+    .steps {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1px;
+        background: var(--line);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        overflow: hidden;
+    }
+
+    .step { padding: 30px 26px; background: var(--bg); }
+
+    .step-number {
+        font-family: var(--mono);
+        color: var(--accent-dim);
+        font-size: 13px;
+        margin-bottom: 30px;
+    }
+
+    .step h3 { font-size: 18px; margin-bottom: 10px; font-weight: 700; }
+    .step p { color: var(--text-muted); line-height: 1.55; font-size: 14.5px; }
+
+    /* ---------- PRICING ---------- */
+
+    .pricing-card {
+        max-width: 460px;
+        padding: 40px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--bg-soft);
+    }
+
+    .pricing-card h3 { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+    .pricing-card .sub { color: var(--text-muted); font-size: 14.5px; margin-bottom: 22px; }
+
+    .price {
+        font-size: 52px;
+        font-weight: 800;
+        margin-bottom: 24px;
+        font-family: var(--mono);
+        letter-spacing: -1px;
+    }
+    .price span { font-size: 15px; color: var(--text-muted); font-weight: 400; font-family: var(--sans); }
+
+    .pricing-card ul { list-style: none; margin-bottom: 28px; }
+
+    .pricing-card li {
+        padding: 11px 0;
+        color: var(--text-muted);
+        border-bottom: 1px solid var(--line-soft);
+        font-size: 14.5px;
+        display: flex;
+        gap: 10px;
+    }
+    .pricing-card li:last-child { border-bottom: none; }
+    .pricing-card li::before {
+        content: "";
+        width: 6px; height: 6px;
+        border-radius: 1px;
+        background: var(--accent);
+        margin-top: 8px;
+        flex-shrink: 0;
+    }
+
+    /* ---------- FINAL CTA ---------- */
+
+    .final-cta { text-align: center; padding-bottom: 140px; }
+
+    .final-cta h2 {
+        font-size: clamp(34px, 5.6vw, 62px);
+        letter-spacing: -2px;
+        font-weight: 800;
+        margin-bottom: 20px;
+    }
+
+    .final-cta p { color: var(--text-muted); font-size: 17px; margin-bottom: 32px; }
+
+    /* ---------- FOOTER ---------- */
+
+    footer {
+        padding: 36px 7%;
+        border-top: 1px solid var(--line-soft);
+        display: flex;
+        justify-content: space-between;
+        color: var(--text-faint);
+        font-size: 13px;
+    }
+
+    /* ---------- MOBILE ---------- */
+
+    @media (max-width: 800px) {
+        .nav-links { display: none; }
+        .nav-toggle { display: block; }
+        .hero h1 { letter-spacing: -1.5px; }
+        .steps { grid-template-columns: 1fr; }
+        .log-entry { grid-template-columns: 1fr; gap: 6px; }
+        footer { flex-direction: column; gap: 10px; }
+    }
+</style>
 </head>
-
 <body>
 
-    <!-- NAVIGATION -->
-
+<header>
     <nav>
-        <div class="logo">
-            Office<span>Ward</span>
-        </div>
-
+        <div class="logo"><span class="dot"></span>Office<span>Ward</span></div>
         <div class="nav-links">
             <a href="#features">Features</a>
             <a href="#how">How it works</a>
             <a href="#pricing">Pricing</a>
             <a href="#get-started" class="nav-button">Get started</a>
         </div>
+        <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">☰</button>
     </nav>
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#get-started" class="nav-button">Get started</a>
+    </div>
+</header>
 
+<main>
 
     <!-- HERO -->
-
     <section class="hero">
-
         <div class="hero-content">
+            <div class="badge"><span class="dot"></span>Built for businesses that live on the phone</div>
 
-            <div class="badge">
-                AI employees for modern businesses
-            </div>
+            <h1>Someone's finally<br>answering your phone.</h1>
 
-            <h1>
-                Your business<br>
-                just hired an
-                <span class="gradient-text">employee.</span>
-            </h1>
-
-            <p>
-                OfficeWard answers calls, books appointments,
-                captures leads, remembers customers, and follows
-                your business rules — automatically.
+            <p class="lede">
+                OfficeWard picks up every call, books the appointment, and remembers the
+                customer next time — so nothing gets missed just because your team
+                was busy with someone in the chair.
             </p>
 
             <div class="hero-buttons">
-
-                <a href="#get-started" class="primary-button">
-                    Get started
-                </a>
-
-                <a href="#how" class="secondary-button">
-                    See how it works
-                </a>
-
+                <a href="#get-started" class="primary-button">Get started</a>
+                <a href="#how" class="secondary-button">See how it works</a>
             </div>
 
-
-            <!-- CALL VISUAL -->
-
-            <div class="call-demo">
-
+            <div class="call-demo" role="img" aria-label="Sample phone call: a customer asks about Saturday availability for a haircut, and OfficeWard offers two open times, confirms the booking, and asks if there's anything else.">
                 <div class="call-top">
-                    <span>OFFICEWARD AI EMPLOYEE</span>
-                    <span class="call-status">● LIVE</span>
+                    <span>INCOMING CALL · TUE 2:14 PM</span>
+                    <span class="call-status"><span class="pulse"></span>LIVE</span>
                 </div>
-
-                <div class="wave">
-
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-
+                <div class="transcript">
+                    <div class="line them">
+                        <span class="speaker">CALLER</span>
+                        <span class="bubble">Hey, do you have anything open Saturday afternoon for a haircut?</span>
+                    </div>
+                    <div class="line us">
+                        <span class="speaker">ALEX</span>
+                        <span class="bubble">I've got 2:30 or 3:15 open — which works for you?</span>
+                    </div>
+                    <div class="line them">
+                        <span class="speaker">CALLER</span>
+                        <span class="bubble">3:15 is perfect.</span>
+                    </div>
+                    <div class="line us">
+                        <span class="speaker">ALEX</span>
+                        <span class="bubble">You're booked for 3:15 Saturday. Anything else?</span>
+                    </div>
+                    <div class="footnote">Booked in 40 seconds. No hold music.</div>
                 </div>
-
             </div>
-
         </div>
-
     </section>
-
 
     <!-- FEATURES -->
-
     <section id="features">
-
         <div class="section-title">
-
-            <h2>
-                Not another chatbot.
-                An employee.
-            </h2>
-
-            <p>
-                OfficeWard is built to actually do things for your
-                business — not just generate text.
-            </p>
-
+            <div class="eyebrow">What it does</div>
+            <h2>Not another chatbot. An employee.</h2>
+            <p>OfficeWard is built to actually get things done for your business — not just generate text.</p>
         </div>
 
-
-        <div class="features">
-
-            <div class="feature">
-
-                <div class="feature-icon">☎</div>
-
-                <h3>Answers calls</h3>
-
-                <p>
-                    Customers get an AI employee instead of
-                    voicemail or a missed call.
-                </p>
-
+        <div class="call-log">
+            <div class="log-entry">
+                <div class="tag">ANSWER</div>
+                <div>
+                    <h3>Answers every call</h3>
+                    <p>No hold music, no voicemail, no missed calls during your busiest hour.</p>
+                </div>
             </div>
-
-
-            <div class="feature">
-
-                <div class="feature-icon">◉</div>
-
-                <h3>Books appointments</h3>
-
-                <p>
-                    OfficeWard understands availability and
-                    handles bookings automatically.
-                </p>
-
+            <div class="log-entry">
+                <div class="tag">BOOK</div>
+                <div>
+                    <h3>Books the appointment</h3>
+                    <p>Checks real availability against your calendar and confirms it on the spot — no back-and-forth.</p>
+                </div>
             </div>
-
-
-            <div class="feature">
-
-                <div class="feature-icon">↗</div>
-
-                <h3>Captures leads</h3>
-
-                <p>
-                    Turn conversations into useful customer
-                    information instead of losing potential business.
-                </p>
-
+            <div class="log-entry">
+                <div class="tag">REMEMBER</div>
+                <div>
+                    <h3>Remembers the customer</h3>
+                    <p>Returning callers get recognized by name instead of starting over from zero every time.</p>
+                </div>
             </div>
-
-
-            <div class="feature">
-
-                <div class="feature-icon">✦</div>
-
-                <h3>Remembers customers</h3>
-
-                <p>
-                    Returning customers don't have to start from
-                    zero every time they call.
-                </p>
-
+            <div class="log-entry">
+                <div class="tag">ESCALATE</div>
+                <div>
+                    <h3>Knows what it doesn't know</h3>
+                    <p>If a request is unusual or unclear, it takes a message or hands off to your team instead of guessing.</p>
+                </div>
             </div>
-
         </div>
-
     </section>
-
 
     <!-- HOW IT WORKS -->
-
     <section id="how">
-
         <div class="section-title">
-
-            <h2>
-                One call.<br>
-                Four steps.
-            </h2>
-
-            <p>
-                OfficeWard handles the conversation from
-                beginning to end.
-            </p>
-
+            <div class="eyebrow">How it works</div>
+            <h2>One call. Four steps.</h2>
+            <p>OfficeWard handles the conversation from beginning to end, on its own.</p>
         </div>
-
-
         <div class="steps">
-
             <div class="step">
-
                 <div class="step-number">01</div>
-
                 <h3>Customer calls</h3>
-
-                <p>
-                    A customer calls your business.
-                </p>
-
+                <p>A customer calls your business, same number as always.</p>
             </div>
-
-
             <div class="step">
-
                 <div class="step-number">02</div>
-
                 <h3>OfficeWard answers</h3>
-
-                <p>
-                    Your AI employee understands what
-                    the customer needs.
-                </p>
-
+                <p>Your AI employee understands what they need and asks anything it's missing.</p>
             </div>
-
-
             <div class="step">
-
                 <div class="step-number">03</div>
-
                 <h3>It takes action</h3>
-
-                <p>
-                    Book, reschedule, answer questions,
-                    or capture the lead.
-                </p>
-
+                <p>Books, reschedules, answers a question, or takes down the lead.</p>
             </div>
-
-
             <div class="step">
-
                 <div class="step-number">04</div>
-
                 <h3>Your business gets the result</h3>
-
-                <p>
-                    The work is completed without your
-                    staff having to stop what they're doing.
-                </p>
-
+                <p>The work is done without pulling your staff away from the customer in front of them.</p>
             </div>
-
         </div>
-
     </section>
-
 
     <!-- PRICING -->
-
     <section id="pricing">
-
         <div class="section-title">
-
-            <h2>
-                Simple pricing.
-            </h2>
-
-            <p>
-                Start with the OfficeWard employee and
-                scale as your business grows.
-            </p>
-
+            <div class="eyebrow">Pricing</div>
+            <h2>Simple pricing.</h2>
+            <p>One plan to start. We'll add more as OfficeWard grows with you.</p>
         </div>
-
-
         <div class="pricing-card">
-
             <h3>OfficeWard Starter</h3>
-
-            <p style="color:#777;">
-                Your first AI employee.
-            </p>
-
-            <div class="price">
-                $199
-                <span>/month</span>
-            </div>
-
+            <div class="sub">Your first AI employee.</div>
+            <div class="price">$149<span>/month</span></div>
             <ul>
-
-                <li>✓ AI phone receptionist</li>
-                <li>✓ Appointment booking</li>
-                <li>✓ Lead capture</li>
-                <li>✓ Customer profiles</li>
-                <li>✓ Business-specific instructions</li>
-
+                <li>AI phone receptionist</li>
+                <li>Appointment booking</li>
+                <li>Lead capture</li>
+                <li>Customer profiles</li>
+                <li>Business-specific instructions</li>
             </ul>
-
-            <a href="#get-started" class="primary-button">
-                Get started
-            </a>
-
+            <a href="#get-started" class="primary-button">Get started</a>
         </div>
-
     </section>
-
 
     <!-- FINAL CTA -->
-
     <section id="get-started" class="final-cta">
-
-        <h2>
-            Give your business<br>
-            another employee.
-        </h2>
-
-        <p>
-            Let OfficeWard handle the calls.
-            Let your team handle the business.
-        </p>
-
-        <a href="mailto:hello@officeward.com"
-           class="primary-button">
-            Talk to OfficeWard
-        </a>
-
+        <h2>Give your business<br>another employee.</h2>
+        <p>Let OfficeWard take the calls. Let your team take care of the business.</p>
+        <a href="mailto:hello@officeward.com" class="primary-button">Talk to OfficeWard</a>
     </section>
 
+</main>
 
-    <!-- FOOTER -->
+<footer>
+    <div>© 2026 OfficeWard</div>
+    <div>AI employees for business.</div>
+</footer>
 
-    <footer>
+<script>
+    // Nav background on scroll
+    window.addEventListener("scroll", function () {
+        const nav = document.querySelector("nav");
+        nav.style.background = window.scrollY > 50
+            ? "rgba(10, 13, 20, 0.94)"
+            : "rgba(10, 13, 20, 0.72)";
+    });
 
-        <div>
-            © 2026 OfficeWard
-        </div>
+    // Mobile menu toggle
+    const navToggle = document.getElementById("navToggle");
+    const mobileMenu = document.getElementById("mobileMenu");
 
-        <div>
-            AI employees for business.
-        </div>
+    navToggle.addEventListener("click", function () {
+        const isOpen = mobileMenu.classList.toggle("open");
+        navToggle.setAttribute("aria-expanded", isOpen);
+        navToggle.textContent = isOpen ? "✕" : "☰";
+    });
 
-    </footer>
-
-
-    <!-- JAVASCRIPT -->
-
-    <script>
-
-        // Small scroll effect for the navigation
-
-        window.addEventListener("scroll", function () {
-
-            const nav = document.querySelector("nav");
-
-            if (window.scrollY > 50) {
-                nav.style.background = "rgba(5, 5, 9, 0.92)";
-            } else {
-                nav.style.background = "rgba(5, 5, 9, 0.65)";
-            }
-
+    mobileMenu.querySelectorAll("a").forEach(function (link) {
+        link.addEventListener("click", function () {
+            mobileMenu.classList.remove("open");
+            navToggle.setAttribute("aria-expanded", "false");
+            navToggle.textContent = "☰";
         });
-
-    </script>
-
+    });
+</script>
 </body>
 </html>
